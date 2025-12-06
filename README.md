@@ -1,6 +1,6 @@
 # Clustering Explained Through Your CohortAI Project
 
-## Part 1: What is Clustering? (Simple but Detailed)
+## Part 1: What is Clustering?
 
 ### The Simple Answer
 **Clustering** is like organizing a messy room by grouping similar items together - without knowing what groups you're looking for beforehand!
