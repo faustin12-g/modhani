@@ -27,7 +27,7 @@ Imagine you have 200 customers and you want to understand them better. Instead o
 
 #### 3. **Features (Dimensions)**
 - Each customer is described by multiple characteristics (features)
-- In your project: **Age, Annual Income, Spending Score**
+- In this project: **Age, Annual Income, Spending Score**
 - These create a 3D space where each customer is a point
 - Clusters are groups of points that are close together in this space
 
