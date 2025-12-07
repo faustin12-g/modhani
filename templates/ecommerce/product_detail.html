@@ -1,0 +1,114 @@
+{% extends 'ecommerce/base.html' %}
+
+{% block title %}{{ product.name }} - SmartE-Commerce{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Product Image -->
+        <div>
+            {% if product.image and product.image.url %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full rounded-lg shadow-lg" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="w-full h-96 bg-gray-200 rounded-lg items-center justify-center" style="display: none;">
+                    <span class="text-gray-400 text-2xl">Image not available</span>
+                </div>
+            {% else %}
+                <div class="w-full h-96 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
+                    <div class="text-center">
+                        <span class="text-6xl mb-4 block">📦</span>
+                        <span class="text-gray-500 text-lg">No Image Available</span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Product Info -->
+        <div>
+            <h1 class="text-4xl font-bold mb-4">{{ product.name }}</h1>
+            <p class="text-gray-600 mb-6">{{ product.description }}</p>
+            
+            <div class="mb-6">
+                {% if product.discount_price %}
+                    <div class="flex items-center gap-4 mb-2">
+                        <span class="text-4xl font-bold text-blue-600">${{ product.discount_price }}</span>
+                        <span class="text-2xl text-gray-500 line-through">${{ product.price }}</span>
+                        <span class="bg-red-500 text-white px-3 py-1 rounded-full font-semibold">
+                            {{ product.discount_percentage }}% OFF
+                        </span>
+                    </div>
+                {% else %}
+                    <span class="text-4xl font-bold text-blue-600">${{ product.price }}</span>
+                {% endif %}
+            </div>
+
+            <div class="mb-6">
+                <p class="text-sm text-gray-600 mb-2">
+                    <span class="font-semibold">Stock:</span> 
+                    {% if product.stock > 0 %}
+                        <span class="text-green-600">{{ product.stock }} available</span>
+                    {% else %}
+                        <span class="text-red-600">Out of Stock</span>
+                    {% endif %}
+                </p>
+                <p class="text-sm text-gray-600">
+                    <span class="font-semibold">Category:</span> {{ product.category.name }}
+                </p>
+            </div>
+
+            {% if product.stock > 0 %}
+            <form method="post" action="{% url 'ecommerce:add_to_cart' product_id=product.id %}" class="mb-6">
+                {% csrf_token %}
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="quantity" class="font-semibold">Quantity:</label>
+                    <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ product.stock }}" 
+                           class="w-20 px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <button type="submit" class="btn-primary w-full text-lg py-3">
+                    Add to Cart
+                </button>
+            </form>
+            {% else %}
+            <button disabled class="btn-secondary w-full text-lg py-3 opacity-50 cursor-not-allowed">
+                Out of Stock
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recommended Products -->
+    {% if recommended_products %}
+    <div class="mt-12">
+        <h2 class="text-3xl font-bold mb-6">Recommended for You</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for product in recommended_products %}
+            <div class="product-card">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover">
+                {% else %}
+                    <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                        <span class="text-gray-400">No Image</span>
+                    </div>
+                {% endif %}
+                <div class="p-4">
+                    <h3 class="font-semibold text-lg mb-2">{{ product.name }}</h3>
+                    <div class="mb-4">
+                        {% if product.discount_price %}
+                            <span class="text-xl font-bold text-blue-600">${{ product.discount_price }}</span>
+                            <span class="text-sm text-gray-500 line-through ml-2">${{ product.price }}</span>
+                        {% else %}
+                            <span class="text-xl font-bold text-blue-600">${{ product.price }}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'ecommerce:product_detail' product_slug=product.slug %}" 
+                       class="btn-primary text-sm w-full text-center block">
+                        View Details
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

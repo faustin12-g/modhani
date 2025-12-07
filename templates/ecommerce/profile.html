@@ -1,0 +1,105 @@
+{% extends 'ecommerce/base.html' %}
+
+{% block title %}Profile - SmartE-Commerce{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold mb-8">Your Profile</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Segment Information -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold mb-6">Your Customer Segment</h2>
+            
+            {% if profile.segment is not None %}
+                <div class="mb-6">
+                    <div class="segment-badge segment-{{ profile.segment }} text-lg mb-4">
+                        {{ profile.segment_label }}
+                    </div>
+                    <p class="text-gray-600 mb-2">
+                        <span class="font-semibold">Segment ID:</span> {{ profile.segment }}
+                    </p>
+                    {% if profile.age %}
+                        <p class="text-gray-600 mb-2">
+                            <span class="font-semibold">Age:</span> {{ profile.age }}
+                        </p>
+                    {% endif %}
+                    {% if profile.annual_income %}
+                        <p class="text-gray-600 mb-2">
+                            <span class="font-semibold">Annual Income:</span> ${{ profile.annual_income }}k
+                        </p>
+                    {% endif %}
+                    {% if profile.spending_score %}
+                        <p class="text-gray-600 mb-2">
+                            <span class="font-semibold">Spending Score:</span> {{ profile.spending_score }}/100
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-sm text-blue-800">
+                        <strong>What this means:</strong> Based on your demographics, you've been assigned to a customer segment. 
+                        This helps us personalize your shopping experience with products and offers tailored to your preferences.
+                    </p>
+                </div>
+            {% else %}
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p class="text-yellow-800 mb-4">
+                        Complete your profile to get personalized product recommendations!
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Update Segment Form -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold mb-6">Update Your Segment</h2>
+            
+            <form method="post" action="{% url 'ecommerce:update_segment' %}">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="age" class="block text-sm font-semibold mb-2">Age</label>
+                        <input type="number" name="age" id="age" value="{{ profile.age|default:'' }}" 
+                               min="18" max="100" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="annual_income" class="block text-sm font-semibold mb-2">Annual Income (in thousands, e.g., 60 for $60k)</label>
+                        <input type="number" name="annual_income" id="annual_income" 
+                               value="{{ profile.annual_income|default:'' }}" 
+                               min="0" step="0.01" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="spending_score" class="block text-sm font-semibold mb-2">Spending Score (1-100)</label>
+                        <input type="number" name="spending_score" id="spending_score" 
+                               value="{{ profile.spending_score|default:'' }}" 
+                               min="1" max="100" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Rate your spending behavior from 1 (very careful) to 100 (very impulsive)</p>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary w-full py-3">
+                        Update Segment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Account Info -->
+    <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold mb-6">Account Information</h2>
+        <div class="space-y-2">
+            <p><span class="font-semibold">Username:</span> {{ user.username }}</p>
+            <p><span class="font-semibold">Email:</span> {{ user.email }}</p>
+            <p><span class="font-semibold">Member since:</span> {{ user.date_joined|date:"F Y" }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

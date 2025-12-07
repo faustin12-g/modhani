@@ -160,3 +160,8 @@ Desktop.ini
 *.bak
 *.backup
 
+# Test and utility scripts (keep locally, don't commit)
+test_*.py
+fix_*.py
+*_test.py
+

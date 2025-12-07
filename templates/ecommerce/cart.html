@@ -1,0 +1,93 @@
+{% extends 'ecommerce/base.html' %}
+
+{% block title %}Shopping Cart - SmartE-Commerce{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold mb-8">Shopping Cart</h1>
+
+    {% if cart_items %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                {% for item in cart_items %}
+                <div class="flex items-center gap-6 pb-6 mb-6 border-b {% if not forloop.last %}border-gray-200{% endif %}">
+                    {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                             class="w-24 h-24 object-cover rounded-lg">
+                    {% else %}
+                        <div class="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <span class="text-gray-400 text-xs">No Image</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-lg mb-2">{{ item.product.name }}</h3>
+                        <p class="text-gray-600 text-sm mb-2">{{ item.product.category.name }}</p>
+                        <p class="text-blue-600 font-semibold">${{ item.product.current_price }} each</p>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <form method="post" action="{% url 'ecommerce:update_cart' cart_id=item.id %}" class="flex items-center gap-2">
+                            {% csrf_token %}
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" 
+                                   class="w-16 px-2 py-1 border border-gray-300 rounded text-center">
+                            <button type="submit" class="btn-secondary text-sm">Update</button>
+                        </form>
+                        
+                        <p class="font-semibold text-lg w-24 text-right">${{ item.total_price }}</p>
+                        
+                        <a href="{% url 'ecommerce:remove_from_cart' cart_id=item.id %}" 
+                           class="text-red-600 hover:text-red-800">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-20">
+                <h2 class="text-2xl font-bold mb-6">Order Summary</h2>
+                
+                <div class="space-y-4 mb-6">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal:</span>
+                        <span class="font-semibold">${{ total }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Shipping:</span>
+                        <span class="font-semibold">Free</span>
+                    </div>
+                    <div class="border-t pt-4 flex justify-between text-xl font-bold">
+                        <span>Total:</span>
+                        <span class="text-blue-600">${{ total }}</span>
+                    </div>
+                </div>
+
+                <a href="{% url 'ecommerce:checkout' %}" class="btn-primary w-full text-center block py-3">
+                    Proceed to Checkout
+                </a>
+                
+                <a href="{% url 'ecommerce:product_list' %}" class="btn-secondary w-full text-center block py-3 mt-4">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-white rounded-lg shadow-md">
+        <p class="text-gray-500 text-lg mb-4">Your cart is empty.</p>
+        <a href="{% url 'ecommerce:product_list' %}" class="btn-primary inline-block">
+            Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
