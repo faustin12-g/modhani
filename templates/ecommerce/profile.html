@@ -1,24 +1,18 @@
 {% extends 'ecommerce/base.html' %}
 
-{% block title %}Profile - SmartE-Commerce{% endblock %}
+{% block title %}Profile - Cohort{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <h1 class="text-3xl font-bold mb-8">Your Profile</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Segment Information -->
+        <!-- Profile Information -->
         <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold mb-6">Your Customer Segment</h2>
+            <h2 class="text-2xl font-bold mb-6">Your Profile Information</h2>
             
             {% if profile.segment is not None %}
                 <div class="mb-6">
-                    <div class="segment-badge segment-{{ profile.segment }} text-lg mb-4">
-                        {{ profile.segment_label }}
-                    </div>
-                    <p class="text-gray-600 mb-2">
-                        <span class="font-semibold">Segment ID:</span> {{ profile.segment }}
-                    </p>
                     {% if profile.age %}
                         <p class="text-gray-600 mb-2">
                             <span class="font-semibold">Age:</span> {{ profile.age }}
@@ -38,8 +32,8 @@
                 
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <p class="text-sm text-blue-800">
-                        <strong>What this means:</strong> Based on your demographics, you've been assigned to a customer segment. 
-                        This helps us personalize your shopping experience with products and offers tailored to your preferences.
+                        <strong>Personalization Active:</strong> Based on your preferences, we're showing you products 
+                        tailored just for you. Browse the store to see your personalized recommendations!
                     </p>
                 </div>
             {% else %}
@@ -51,9 +45,9 @@
             {% endif %}
         </div>
 
-        <!-- Update Segment Form -->
+        <!-- Update Profile Form -->
         <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold mb-6">Update Your Segment</h2>
+            <h2 class="text-2xl font-bold mb-6">Update Your Preferences</h2>
             
             <form method="post" action="{% url 'ecommerce:update_segment' %}">
                 {% csrf_token %}
@@ -84,7 +78,7 @@
                     </div>
                     
                     <button type="submit" class="btn-primary w-full py-3">
-                        Update Segment
+                        Update Preferences
                     </button>
                 </div>
             </form>

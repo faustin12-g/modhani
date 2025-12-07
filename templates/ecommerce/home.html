@@ -1,21 +1,17 @@
 {% extends 'ecommerce/base.html' %}
 {% load static %}
 
-{% block title %}Home - SmartE-Commerce{% endblock %}
+{% block title %}Home - Cohort{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-            <h1 class="text-5xl font-bold mb-4">Welcome to SmartE-Commerce</h1>
+            <h1 class="text-5xl font-bold mb-4">Welcome to Cohort</h1>
             <p class="text-xl mb-8">Personalized shopping experience powered by AI</p>
             {% if user.is_authenticated %}
-                {% if user.customer_profile.segment %}
-                    <div class="inline-block segment-badge segment-{{ user.customer_profile.segment }} mb-4">
-                        Your Segment: {{ user.customer_profile.segment_label }}
-                    </div>
-                {% else %}
+                {% if not user.customer_profile.segment %}
                     <a href="{% url 'ecommerce:profile' %}" class="btn-primary inline-block mb-4">
                         Complete Your Profile for Personalized Experience
                     </a>
@@ -50,7 +46,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-bold mb-8">
             {% if user.is_authenticated and user.customer_profile.segment %}
-                Personalized for You
+                Recommended for You
             {% else %}
                 Featured Products
             {% endif %}

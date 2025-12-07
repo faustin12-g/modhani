@@ -352,7 +352,7 @@ def update_segment(request):
             profile.segment_label = segment_label
             profile.save()
             
-            messages.success(request, f'Your segment updated: {segment_label}')
+            messages.success(request, 'Your preferences have been updated! You\'ll now see personalized product recommendations.')
         except (ValueError, TypeError):
             messages.error(request, 'Invalid input values.')
     else:
