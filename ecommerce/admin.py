@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, CustomerProfile, Cart, Order, OrderItem
+from .models import Category, Product, CustomerProfile, Cart, Order, OrderItem, ProductTag, UserProductInteraction, ProductSimilarity
 
 
 @admin.register(Category)
@@ -43,3 +43,25 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ['order_number', 'user__username']
     inlines = [OrderItemInline]
     readonly_fields = ['order_number', 'created_at', 'updated_at']
+
+
+@admin.register(ProductTag)
+class ProductTagAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug']
+    prepopulated_fields = {'slug': ('name',)}
+    search_fields = ['name']
+
+
+@admin.register(UserProductInteraction)
+class UserProductInteractionAdmin(admin.ModelAdmin):
+    list_display = ['user', 'product', 'interaction_type', 'created_at']
+    list_filter = ['interaction_type', 'created_at']
+    search_fields = ['user__username', 'product__name']
+    readonly_fields = ['created_at']
+
+
+@admin.register(ProductSimilarity)
+class ProductSimilarityAdmin(admin.ModelAdmin):
+    list_display = ['product', 'similar_product', 'similarity_score']
+    list_filter = ['product__category']
+    search_fields = ['product__name', 'similar_product__name']

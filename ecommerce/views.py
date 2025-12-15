@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
-from .models import Category, Product, CustomerProfile, Cart, Order, OrderItem
+from .models import Category, Product, CustomerProfile, Cart, Order, OrderItem, UserProductInteraction
 from ml_engine.registry import ClusterRegistry
 from ml_engine.logic import get_cluster_name
 import json
@@ -17,32 +17,17 @@ def home(request):
     """Homepage with personalized product recommendations"""
     categories = Category.objects.all()[:6]
     
-    # Get personalized products based on user segment
-    products = list(Product.objects.filter(is_active=True))
-    
+    # Get personalized recommendations
+    featured_products = None
     if request.user.is_authenticated:
-        try:
-            profile = request.user.customer_profile
-            if profile.segment is not None:
-                # Filter products for user's segment (Python filtering for SQLite compatibility)
-                segment = profile.segment
-                filtered_products = []
-                for product in products:
-                    # Check if segment is in target_segments list
-                    if segment in (product.target_segments or []):
-                        filtered_products.append(product)
-                    # Target customers get premium products
-                    elif segment == 1 and product.is_premium:
-                        filtered_products.append(product)
-                    # Sensible/Budget customers get budget items
-                    elif segment in [0, 3] and product.is_budget:
-                        filtered_products.append(product)
-                
-                products = filtered_products if filtered_products else products
-        except CustomerProfile.DoesNotExist:
-            pass
+        from .recommendations import RecommendationEngine
+        engine = RecommendationEngine(request.user)
+        featured_products = engine.get_recommendations(limit=8)
     
-    featured_products = products[:8]
+    # Fallback to popular products if no recommendations
+    if not featured_products:
+        featured_products = list(Product.objects.filter(is_active=True).order_by('-created_at')[:8])
+    
     new_products = list(Product.objects.filter(is_active=True).order_by('-created_at')[:8])
     
     context = {
@@ -111,32 +96,27 @@ def product_detail(request, product_slug):
     """Product detail page with personalized recommendations"""
     product = get_object_or_404(Product, slug=product_slug, is_active=True)
     
+    # Track view if user is authenticated
+    if request.user.is_authenticated:
+        UserProductInteraction.objects.update_or_create(
+            user=request.user,
+            product=product,
+            interaction_type='view',
+            defaults={'interaction_weight': 0.1}
+        )
+    
     # Get similar products (same category)
     similar_products = Product.objects.filter(
         category=product.category,
         is_active=True
     ).exclude(id=product.id)[:4]
     
-    # Personalized recommendations based on segment
+    # Get personalized recommendations
     recommended_products = None
     if request.user.is_authenticated:
-        try:
-            profile = request.user.customer_profile
-            if profile.segment is not None:
-                # Python filtering for SQLite compatibility
-                segment = profile.segment
-                all_products = list(Product.objects.filter(is_active=True).exclude(id=product.id))
-                filtered_products = []
-                for prod in all_products:
-                    if segment in (prod.target_segments or []):
-                        filtered_products.append(prod)
-                    elif segment == 1 and prod.is_premium:
-                        filtered_products.append(prod)
-                    elif segment in [0, 3] and prod.is_budget:
-                        filtered_products.append(prod)
-                recommended_products = filtered_products[:4] if filtered_products else all_products[:4]
-        except CustomerProfile.DoesNotExist:
-            pass
+        from .recommendations import RecommendationEngine
+        engine = RecommendationEngine(request.user)
+        recommended_products = engine.get_recommendations(limit=4)
     
     context = {
         'product': product,
@@ -181,6 +161,14 @@ def add_to_cart(request, product_id):
         if cart_item.quantity > product.stock:
             cart_item.quantity = product.stock
         cart_item.save()
+    
+    # Track add to cart interaction
+    UserProductInteraction.objects.update_or_create(
+        user=request.user,
+        product=product,
+        interaction_type='add_to_cart',
+        defaults={'interaction_weight': 0.5}
+    )
     
     messages.success(request, f'{product.name} added to cart!')
     return redirect('ecommerce:cart')

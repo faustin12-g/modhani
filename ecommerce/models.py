@@ -37,10 +37,13 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     
-    # Segment targeting
-    target_segments = models.JSONField(default=list, help_text="List of segment IDs this product targets")
+    # Segment targeting (keeping for backward compatibility but not used in recommendations)
+    target_segments = models.JSONField(default=list, help_text="List of segment IDs this product targets", blank=True)
     is_premium = models.BooleanField(default=False, help_text="Premium product for high-income segments")
     is_budget = models.BooleanField(default=False, help_text="Budget-friendly for price-sensitive segments")
+    
+    # New fields for recommendation system
+    tags = models.ManyToManyField('ProductTag', blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -146,3 +149,46 @@ class OrderItem(models.Model):
     @property
     def total_price(self):
         return self.price * self.quantity
+
+
+class ProductTag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class UserProductInteraction(models.Model):
+    INTERACTION_TYPES = [
+        ('view', 'View'),
+        ('add_to_cart', 'Add to Cart'),
+        ('purchase', 'Purchase')
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    interaction_type = models.CharField(max_length=20, choices=INTERACTION_TYPES)
+    interaction_weight = models.FloatField(default=0.1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product', 'interaction_type')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_interaction_type_display()} - {self.product.name}"
+
+
+class ProductSimilarity(models.Model):
+    product = models.ForeignKey(Product, related_name='similar_products', on_delete=models.CASCADE)
+    similar_product = models.ForeignKey(Product, related_name='similar_to', on_delete=models.CASCADE)
+    similarity_score = models.FloatField()
+
+    class Meta:
+        unique_together = ('product', 'similar_product')
+        verbose_name_plural = "Product Similarities"
+
+    def __str__(self):
+        return f"{self.product.name} -> {self.similar_product.name} ({self.similarity_score:.2f})"
