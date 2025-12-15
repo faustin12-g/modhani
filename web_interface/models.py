@@ -2,7 +2,6 @@ from django.db import models
 
 class CustomerLog(models.Model):
     # Inputs
-    age = models.IntegerField()
     annual_income = models.FloatField()
     spending_score = models.FloatField()
     

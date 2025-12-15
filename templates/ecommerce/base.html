@@ -96,6 +96,7 @@
                     <ul class="space-y-2 text-gray-400">
                         <li><a href="{% url 'ecommerce:product_list' %}" class="hover:text-white">Shop</a></li>
                         <li><a href="{% url 'ecommerce:home' %}" class="hover:text-white">Home</a></li>
+                        <li><a href="/customer-segmentation/" class="hover:text-white">Customer Segmentation</a></li>
                         {% if user.is_authenticated %}
                             <li><a href="{% url 'ecommerce:profile' %}" class="hover:text-white">Profile</a></li>
                         {% endif %}

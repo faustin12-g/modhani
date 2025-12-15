@@ -145,16 +145,11 @@
         
         <div class="input-section">
             <h1>CohortAI 🤖</h1>
-            <p class="subtitle">Enter customer demographics to analyze their segment.</p>
+            <p class="subtitle">Enter customer income and spending score to analyze their segment.</p>
             
             <form method="POST">
                 {% csrf_token %}
                 
-                <div class="form-group">
-                    <label>Customer Age</label>
-                    <input type="number" name="age" required value="{{ input_age }}" placeholder="e.g. 30">
-                </div>
-
                 <div class="form-group">
                     <label>Annual Income (k$)</label>
                     <input type="number" name="income" required value="{{ input_income }}" placeholder="e.g. 85">

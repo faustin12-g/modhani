@@ -64,7 +64,6 @@ class Product(models.Model):
 
 class CustomerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer_profile')
-    age = models.PositiveIntegerField(null=True, blank=True)
     annual_income = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     spending_score = models.IntegerField(
         null=True, 

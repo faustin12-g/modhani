@@ -34,11 +34,10 @@ def generate_cluster_plot(user_income, user_score, current_cluster_id):
         scaler = joblib.load(SCALER_PATH)
         
         # Get cluster assignments for all customers
-        # Note: Model expects 'Age', 'Annual_Income', 'Spending_Score' (as used in training)
-        # But we renamed to 'Income' and 'Score' for display
+        # Prepare features for prediction (only Income and Spending Score)
         df_temp = df.copy()
         df_temp.rename(columns={'Income': 'Annual_Income', 'Score': 'Spending_Score'}, inplace=True)
-        features = ['Age', 'Annual_Income', 'Spending_Score']
+        features = ['Annual_Income', 'Spending_Score']
         X = df_temp[features].values
         X_scaled = scaler.transform(X)
         df['Cluster'] = model.predict(X_scaled)
@@ -54,74 +53,15 @@ def generate_cluster_plot(user_income, user_score, current_cluster_id):
     sns.set_style("whitegrid")
 
     # 4. Plot customers by cluster with different colors
-    # Define colors for each cluster
-    cluster_colors = {
-        0: '#3498db',  # Blue
-        1: '#2ecc71',  # Green
-        2: '#e74c3c',  # Red
-        3: '#f39c12',  # Orange
-        4: '#9b59b6',  # Purple
-    }
-    
-    # Define marker styles for better distinction (especially for overlapping clusters)
-    cluster_markers = {
-        0: 'o',  # Circle
-        1: 's',  # Square
-        2: '^',  # Triangle
-        3: 'D',  # Diamond
-        4: 'v',  # Triangle down
-    }
-    
-    # Define small offsets for clusters that overlap in 2D space
-    # These clusters are separated by Age (3rd dimension) but overlap in Income vs Score
-    # Small offsets help visualize both clusters without misrepresenting the data
-    # Note: Clusters 0 and 3 overlap in 2D but differ in Age (Cluster 0: older, Cluster 3: younger)
-    cluster_offsets = {
-        0: (-2.5, -2.5),  # Cluster 0: offset down-left (older customers, age 40-70)
-        1: (0, 0),         # Cluster 1: no offset
-        2: (0, 0),         # Cluster 2: no offset
-        3: (2.5, 2.5),     # Cluster 3: offset up-right (younger customers, age 18-40)
-        4: (0, 0),         # Cluster 4: no offset
-    }
-    
-    # Plot clusters in reverse order so smaller clusters appear on top
-    # This prevents larger clusters from completely hiding smaller ones
-    unique_clusters = sorted([c for c in df['Cluster'].unique() if c != -1], reverse=True)
-    
-    for cluster_id in unique_clusters:
-        cluster_data = df[df['Cluster'] == cluster_id].copy()
-        color = cluster_colors.get(cluster_id, 'lightgray')
-        marker = cluster_markers.get(cluster_id, 'o')
-        
-        # Apply small offset to separate overlapping clusters
-        offset_x, offset_y = cluster_offsets.get(cluster_id, (0, 0))
-        x_coords = cluster_data['Income'] + offset_x
-        y_coords = cluster_data['Score'] + offset_y
-        
-        # Use different opacity and size for current cluster vs others
-        if cluster_id == current_cluster_id:
-            alpha = 0.8
-            size = 60
-            edge_width = 0.8
-            z_order = 5  # Higher z-order for current cluster
-        else:
-            alpha = 0.6  # Increased from 0.4 for better visibility
-            size = 50
-            edge_width = 0.3
-            z_order = 1  # Lower z-order for background clusters
-        
-        plt.scatter(
-            x=x_coords, 
-            y=y_coords, 
-            c=color,
-            s=size, 
-            alpha=alpha,
-            marker=marker,
-            label=f'Cluster {cluster_id}',
-            edgecolors='black',
-            linewidths=edge_width,
-            zorder=z_order
-        )
+    scatter = sns.scatterplot(
+        x='Income', 
+        y='Score',
+        hue='Cluster',
+        palette='viridis',
+        data=df,
+        legend='full',
+        alpha=0.7
+    )
 
     # 5. Plot the CURRENT User (Big Red Star with black border)
     plt.scatter(

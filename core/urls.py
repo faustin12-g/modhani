@@ -5,8 +5,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('web_interface.urls')),  # Original CohortAI interface
-    path('store/', include('ecommerce.urls')),  # E-commerce store
+    path('customer-segmentation/', include('web_interface.urls')),  # Moved CohortAI interface to /customer-segmentation
+    path('', include('ecommerce.urls')),  # E-commerce store as home page
 ]
 
 # Serve media files in development

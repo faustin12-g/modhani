@@ -19,7 +19,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerProfile)
 class CustomerProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'age', 'annual_income', 'spending_score', 'segment', 'segment_label']
+    list_display = ['user', 'annual_income', 'spending_score', 'segment', 'segment_label']
     list_filter = ['segment', 'segment_label']
     search_fields = ['user__username', 'user__email']
 

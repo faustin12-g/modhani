@@ -58,8 +58,8 @@ class ClusterRegistry:
                 'Spending Score (1-100)': 'Spending_Score'
             }, inplace=True)
             
-            # Prepare features and get cluster assignments
-            features = ['Age', 'Annual_Income', 'Spending_Score']
+            # Prepare features and get cluster assignments (only Income and Spending Score)
+            features = ['Annual_Income', 'Spending_Score']
             X = df[features].values
             X_scaled = self._scaler.transform(X)
             df['Cluster'] = self._model.predict(X_scaled)
@@ -74,7 +74,6 @@ class ClusterRegistry:
                 self._cluster_stats[cluster_id] = {
                     'mean_income': cluster_data['Annual_Income'].mean(),
                     'mean_score': cluster_data['Spending_Score'].mean(),
-                    'mean_age': cluster_data['Age'].mean(),
                     'count': len(cluster_data),
                     'overall_mean_income': overall_mean_income,
                     'overall_mean_score': overall_mean_score
@@ -92,10 +91,11 @@ class ClusterRegistry:
     def predict_segment(self, age, income, score):
         """
         Takes raw customer data, scales it, and returns the Cluster ID.
+        Note: Age parameter is kept for backward compatibility but not used in clustering.
         """
         # 1. Prepare input (2D array expected by sklearn)
-        # The order MUST match exactly what we used in training: [Age, Annual_Income, Spending_Score]
-        raw_input = np.array([[age, income, score]])
+        # Only using Income and Spending Score as features
+        raw_input = np.array([[income, score]])
         
         # 2. Scale the data
         # We must use the SAME scaler we saved. 

@@ -323,29 +323,26 @@ def profile(request):
 @login_required
 @require_POST
 def update_segment(request):
-    """Update user segment based on demographics"""
+    """Update user segment based on income and spending score"""
     try:
         profile = request.user.customer_profile
     except CustomerProfile.DoesNotExist:
         profile = CustomerProfile.objects.create(user=request.user)
     
-    age = request.POST.get('age')
     income = request.POST.get('annual_income')
     score = request.POST.get('spending_score')
     
-    if age and income and score:
+    if income and score:
         try:
-            age = int(age)
             income = float(income)
             score = int(score)
             
-            profile.age = age
             profile.annual_income = income
             profile.spending_score = score
             
-            # Get segment from ML model
+            # Get segment from ML model (passing 0 for age as it's not used)
             registry = ClusterRegistry.get_instance()
-            segment_id = registry.predict_segment(age, income, score)
+            segment_id = registry.predict_segment(0, income, score)
             segment_label = get_cluster_name(segment_id)
             
             profile.segment = segment_id
@@ -356,7 +353,7 @@ def update_segment(request):
         except (ValueError, TypeError):
             messages.error(request, 'Invalid input values.')
     else:
-        messages.error(request, 'Please fill all fields.')
+        messages.error(request, 'Please fill all required fields.')
     
     return redirect('ecommerce:profile')
 
@@ -374,7 +371,6 @@ def segment_info(request):
         return JsonResponse({
             'segment_id': profile.segment,
             'segment_label': profile.segment_label,
-            'age': profile.age,
             'income': float(profile.annual_income) if profile.annual_income else None,
             'score': profile.spending_score,
         })

@@ -34,8 +34,8 @@ def train_brain():
         'Spending Score (1-100)': 'Spending_Score'
     }, inplace=True)
 
-    # We only need these 3 columns for clustering
-    features = ['Age', 'Annual_Income', 'Spending_Score']
+    # We only need these 2 columns for clustering (excluding Age)
+    features = ['Annual_Income', 'Spending_Score']
     X = df[features].values
 
     # 4. SCALING (Crucial for K-Means)
